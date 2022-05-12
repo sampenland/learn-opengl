@@ -88,12 +88,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\Shaders.cpp" />
     <ClCompile Include="src\glad.c" />
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="shaders\fragment\default_frag.glsl" />
-    <None Include="shaders\vertex\default_vert.glsl" />
+    <None Include="src\shaders\fragment\default_frag.glsl" />
+    <None Include="src\shaders\vertex\default_vert.glsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\Shaders.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
