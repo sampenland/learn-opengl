@@ -64,10 +64,11 @@ int main()
         "out vec4 FragColor;\n"
         "in vec3 ourColor;\n"
         "in vec2 TexCoord;\n"
-        "uniform sampler2D ourTexture;\n"
+        "uniform sampler2D texture1;\n"
+        "uniform sampler2D texture2;; \n"
         "void main()\n"
         "{"
-        "    FragColor = texture(ourTexture, TexCoord) * vec4(ourColor, 1.0);\n"
+        "    FragColor = mix(texture(texture1, TexCoord), texture(texture2, TexCoord), 0.2);\n"
         "}\0";
 
     unsigned int vertexShader;
@@ -130,12 +131,16 @@ int main()
     glGenVertexArrays(1, &VAO);
     glBindVertexArray(VAO);
 
+    stbi_set_flip_vertically_on_load(true);
+    unsigned int texture1, texture2;
+
     int width, height, nrChannels;
     unsigned char* data = stbi_load("res/container.jpg", &width, &height, &nrChannels, 0);
 
-    unsigned int texture;
-    glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture);
+    glGenTextures(1, &texture1);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texture1);
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -145,6 +150,29 @@ int main()
     if (data)
     {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    else
+    {
+        std::cout << "Failed to load texture" << std::endl;
+        return -1;
+    }
+
+    data = stbi_load("res/awesomeface.png", &width, &height, &nrChannels, 0);
+
+    glGenTextures(1, &texture2);
+
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, texture2);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    if (data)
+    {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
     }
     else
@@ -177,6 +205,10 @@ int main()
     // Draw in wireframe
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
+    glUseProgram(shaderProgram);
+    glUniform1i(glGetUniformLocation(shaderProgram, "texture1"), 0);
+    glUniform1i(glGetUniformLocation(shaderProgram, "texture2"), 1);
+
     // render loop
     while (!glfwWindowShouldClose(window))
     {
@@ -189,7 +221,11 @@ int main()
         
         glUseProgram(shaderProgram);
 
-        glBindTexture(GL_TEXTURE_2D, texture);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, texture1);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, texture2);
+
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
