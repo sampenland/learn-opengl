@@ -100,10 +100,6 @@
     <ClInclude Include="src\Shaders.h" />
     <ClInclude Include="src\stb_image.h" />
   </ItemGroup>
-  <ItemGroup>
-    <Image Include="res\awesomeface.png" />
-    <Image Include="res\container.jpg" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
