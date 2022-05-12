@@ -9,9 +9,10 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
     glViewport(0, 0, width, height);
 }
 
-void Print(const std::string& text)
+void processInput(GLFWwindow* window)
 {
-	std::cout << text << std::endl;
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+        glfwSetWindowShouldClose(window, true);
 }
 
 int main()
@@ -41,10 +42,19 @@ int main()
     glViewport(0, 0, 800, 600);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
+    // render loop
     while (!glfwWindowShouldClose(window))
     {
-        glfwSwapBuffers(window);
+        // input
+        processInput(window);
+
+        // rendering commands here
+        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        // check and call events and swap the buffers
         glfwPollEvents();
+        glfwSwapBuffers(window);
     }
 
     glfwTerminate();
