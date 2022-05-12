@@ -64,10 +64,12 @@ int main()
         "out vec4 FragColor;\n"
         "in vec3 ourColor;\n"
         "in vec2 TexCoord;\n"
-        "uniform sampler2D ourTexture;\n"
+        "uniform sampler2D texture1;\n"
+        "uniform sampler2D texture2; \n"
+        "\n"
         "void main()\n"
         "{"
-        "    FragColor = texture(ourTexture, TexCoord) * vec4(ourColor, 1.0);\n"
+        "    FragColor = mix(texture(texture1, TexCoord), texture(texture2, TexCoord), 0.2);\n"
         "}\0";
 
     unsigned int vertexShader;
@@ -130,17 +132,13 @@ int main()
     glGenVertexArrays(1, &VAO);
     glBindVertexArray(VAO);
 
-    int width, height, nrChannels;
-    unsigned char* data = stbi_load("res/container.jpg", &width, &height, &nrChannels, 0);
-
-    unsigned int texture;
-    glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture);
-
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    int width, height, nrChannels;
+    unsigned char* data = stbi_load("res/container.jpg", &width, &height, &nrChannels, 0);
 
     if (data)
     {
@@ -152,6 +150,28 @@ int main()
         std::cout << "Failed to load texture" << std::endl;
         return -1;
     }
+
+    unsigned char* data2 = stbi_load("res/awesomeface.png", &width, &height, &nrChannels, 0);
+    if (data2)
+    {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data2);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    else
+    {
+        std::cout << "Failed to load texture" << std::endl;
+        return -1;
+    }
+
+    unsigned int texture1, texture2;
+    glGenTextures(1, &texture1);
+    glGenTextures(1, &texture2);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texture1);
+
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, texture2);
 
     stbi_image_free(data);
 
@@ -174,8 +194,17 @@ int main()
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
     glEnableVertexAttribArray(2);
 
+    glUseProgram(shaderProgram);
+    glUniform1i(glGetUniformLocation(shaderProgram, "texture1"), 0);
+    glUniform1i(glGetUniformLocation(shaderProgram, "texture2"), 1);
+
     // Draw in wireframe
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+    if (glGetError() == 0)
+    {
+        std::cout << glGetError() << std::endl;
+    }
 
     // render loop
     while (!glfwWindowShouldClose(window))
@@ -189,7 +218,11 @@ int main()
         
         glUseProgram(shaderProgram);
 
-        glBindTexture(GL_TEXTURE_2D, texture);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, texture1);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, texture2);
+
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
