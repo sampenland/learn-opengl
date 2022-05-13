@@ -6,6 +6,10 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 #include <string>
 #include <iostream>
 
@@ -53,9 +57,12 @@ int main()
         "\n"
         "out vec3 ourColor;\n"
         "out vec2 TexCoord;\n"
+        "\n"
+        "uniform mat4 transform;\n"
+        "\n"
         "void main()\n"
         "{\n"
-        "   gl_Position = vec4(aPos, 1.0);\n"
+        "   gl_Position = transform * vec4(aPos, 1.0);\n"
         "   ourColor = aColor;\n"
         "   TexCoord = aTexCoord;\n"
         "}\0";
@@ -220,6 +227,11 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT);
         
         glUseProgram(shaderProgram);
+
+        glm::mat4 trans = glm::mat4(1.0f);
+        trans = glm::translate(trans, glm::vec3(0.5f, -0.5f, 0.0f));
+        trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
+        glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "transform"), 1, GL_FALSE, glm::value_ptr(trans));
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texture1);
