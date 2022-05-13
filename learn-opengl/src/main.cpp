@@ -58,11 +58,13 @@ int main()
         "out vec3 ourColor;\n"
         "out vec2 TexCoord;\n"
         "\n"
-        "uniform mat4 transform;\n"
+        "uniform mat4 model;\n"
+        "uniform mat4 view;\n"
+        "uniform mat4 projection;\n"
         "\n"
         "void main()\n"
         "{\n"
-        "   gl_Position = transform * vec4(aPos, 1.0);\n"
+        "   gl_Position = projection * view * model * vec4(aPos, 1.0);\n"
         "   ourColor = aColor;\n"
         "   TexCoord = aTexCoord;\n"
         "}\0";
@@ -216,6 +218,20 @@ int main()
     glUniform1i(glGetUniformLocation(shaderProgram, "texture1"), 0);
     glUniform1i(glGetUniformLocation(shaderProgram, "texture2"), 1);
 
+    glm::mat4 model = glm::mat4(1.0f);
+    model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+
+    glm::mat4 view = glm::mat4(1.0f);
+    // note that we're translating the scene in the reverse direction of where we want to move
+    view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+
+    glm::mat4 projection;
+    projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
+
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(model));
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, glm::value_ptr(view));
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+
     // render loop
     while (!glfwWindowShouldClose(window))
     {
@@ -227,11 +243,6 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT);
         
         glUseProgram(shaderProgram);
-
-        glm::mat4 trans = glm::mat4(1.0f);
-        trans = glm::translate(trans, glm::vec3(0.5f, -0.5f, 0.0f));
-        trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
-        glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "transform"), 1, GL_FALSE, glm::value_ptr(trans));
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texture1);
