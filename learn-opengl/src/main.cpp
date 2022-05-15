@@ -217,6 +217,14 @@ int main()
         objectShader.setVec3("lightPos", lightPos);
         objectShader.setVec3("viewPos", cameraPos);
 
+        glm::vec3 ambient(1.0f, 0.5f, 0.31f);
+        glm::vec3 diffuse(1.0f, 0.5f, 0.31f);
+        glm::vec3 specular(0.5f, 0.5f, 0.5f);
+        objectShader.setVec3("material.ambient", ambient);
+        objectShader.setVec3("material.diffuse", diffuse);
+        objectShader.setVec3("material.specular", specular);
+        objectShader.setFloat("material.shininess", 32.0f);
+
         glm::vec3 direction;
         direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
         direction.y = sin(glm::radians(pitch));
