@@ -211,15 +211,24 @@ int main()
         
         objectShader.use();
         glm::vec3 objectColor(1.0f, 0.5f, 0.31f);
-        glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
+        glm::vec3 lightColor;
+        lightColor.x = sin(glfwGetTime() * 2.0f);
+        lightColor.y = sin(glfwGetTime() * 0.7f);
+        lightColor.z = sin(glfwGetTime() * 1.3f);
+
+        glm::vec3 diffuseColor = lightColor * glm::vec3(0.5f);
+        glm::vec3 ambientColor = diffuseColor * glm::vec3(0.2f);
+        objectShader.setVec3("light.ambient", ambientColor);
+        objectShader.setVec3("light.diffuse", diffuseColor); // darken diffuse light a bit
+        objectShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
         objectShader.setVec3("objectColor", objectColor);
-        objectShader.setVec3("lightColor", lightColor);
         objectShader.setVec3("lightPos", lightPos);
         objectShader.setVec3("viewPos", cameraPos);
 
         glm::vec3 ambient(1.0f, 0.5f, 0.31f);
         glm::vec3 diffuse(1.0f, 0.5f, 0.31f);
         glm::vec3 specular(0.5f, 0.5f, 0.5f);
+        
         objectShader.setVec3("material.ambient", ambient);
         objectShader.setVec3("material.diffuse", diffuse);
         objectShader.setVec3("material.specular", specular);
